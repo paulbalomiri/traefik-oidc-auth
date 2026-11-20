@@ -11,10 +11,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
-	"github.com/sevensolutions/traefik-oidc-auth/src/oidc"
-	"github.com/sevensolutions/traefik-oidc-auth/src/session"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/oidc"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/session"
 )
 
 func newPkceTestAuth(t *testing.T) *TraefikOidcAuth {

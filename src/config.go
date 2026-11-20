@@ -14,12 +14,12 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
-	"github.com/sevensolutions/traefik-oidc-auth/src/errorPages"
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
-	"github.com/sevensolutions/traefik-oidc-auth/src/rules"
-	"github.com/sevensolutions/traefik-oidc-auth/src/session"
-	"github.com/sevensolutions/traefik-oidc-auth/src/utils"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/errorPages"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/rules"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/session"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/utils"
 )
 
 // Will be called by traefik

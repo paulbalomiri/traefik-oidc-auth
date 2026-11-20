@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/utils"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/utils"
 )
 
 type OidcState struct {

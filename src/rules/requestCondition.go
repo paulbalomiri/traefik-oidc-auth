@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
 )
 
 type RequestCondition struct {

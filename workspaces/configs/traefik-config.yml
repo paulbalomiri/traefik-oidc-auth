@@ -17,11 +17,11 @@ api:
 experimental:
   localPlugins:
     traefik-oidc-auth:
-      moduleName: github.com/sevensolutions/traefik-oidc-auth
+      moduleName: github.com/paulbalomiri/traefik-oidc-auth
   # To test the released version
   #plugins:
   #  traefik-oidc-auth:
-  #    moduleName: "github.com/sevensolutions/traefik-oidc-auth"
+  #    moduleName: "github.com/paulbalomiri/traefik-oidc-auth"
   #    version: v0.24.0
   
 providers:

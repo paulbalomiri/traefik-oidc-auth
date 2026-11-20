@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
 )
 
 func newTestConfig() *config.Config {

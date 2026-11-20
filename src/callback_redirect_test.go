@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/oidc"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/oidc"
 )
 
 func newTokenTestServer(t *testing.T) *httptest.Server {

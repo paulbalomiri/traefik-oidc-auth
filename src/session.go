@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
-	"github.com/sevensolutions/traefik-oidc-auth/src/session"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/session"
 )
 
 var errNoSessionCookie = errors.New("no session cookie is present")

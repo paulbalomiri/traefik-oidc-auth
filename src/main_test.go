@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
-	"github.com/sevensolutions/traefik-oidc-auth/src/session"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/session"
 )
 
 func TestTemplate_mapToJsonArray(t *testing.T) {

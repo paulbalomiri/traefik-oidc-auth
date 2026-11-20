@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
-	"github.com/sevensolutions/traefik-oidc-auth/src/utils"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/utils"
 )
 
 type ProblemDetails struct {

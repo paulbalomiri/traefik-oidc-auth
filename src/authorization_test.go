@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sevensolutions/traefik-oidc-auth/src/config"
-	"github.com/sevensolutions/traefik-oidc-auth/src/logging"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/config"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/logging"
 )
 
 func createAuthInstance(claims []config.ClaimAssertion) *config.AuthorizationConfig {

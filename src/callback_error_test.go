@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sevensolutions/traefik-oidc-auth/src/errorPages"
-	"github.com/sevensolutions/traefik-oidc-auth/src/oidc"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/errorPages"
+	"github.com/paulbalomiri/traefik-oidc-auth/src/oidc"
 )
 
 func newCallbackErrorTestAuth(t *testing.T) *TraefikOidcAuth {
