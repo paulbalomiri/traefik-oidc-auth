@@ -359,7 +359,7 @@ func (toa *TraefikOidcAuth) handleCallback(rw http.ResponseWriter, req *http.Req
 			// already has an SSO session (e.g. another tab logged in meanwhile). A fresh authorization
 			// request completes without a prompt, which is also what keycloak-js does.
 			if idpError == "temporarily_unavailable" && errorDescription == "authentication_expired" && !state.Retried {
-				toa.redirectToProviderWithRetry(rw, req, redirectUrl, state.IsChallenge, true)
+				toa.redirectToProviderAsking(rw, req, redirectUrl, state.IsChallenge, true, state.Scopes)
 				return
 			}
 
@@ -387,7 +387,7 @@ func (toa *TraefikOidcAuth) handleCallback(rw http.ResponseWriter, req *http.Req
 			// login bound to this browser. At worst, a victim of a forged callback logs in as themselves.
 			if !state.Retried {
 				toa.logger.Log(logging.LevelWarn, "The login wasn't started by this browser. Restarting the login.")
-				toa.redirectToProviderWithRetry(rw, req, redirectUrl, state.IsChallenge, true)
+				toa.redirectToProviderAsking(rw, req, redirectUrl, state.IsChallenge, true, state.Scopes)
 				return
 			}
 
@@ -472,6 +472,7 @@ func (toa *TraefikOidcAuth) handleCallback(rw http.ResponseWriter, req *http.Req
 			IsAuthorized:       isAuthorized,
 			TokenExpiresIn:     token.ExpiresIn,
 			ChallengeAttempted: state.IsChallenge,
+			Scopes:             state.Scopes,
 		}
 
 		toa.storeSessionAndAttachCookie(session, rw)
@@ -504,7 +505,7 @@ func (toa *TraefikOidcAuth) handleCallback(rw http.ResponseWriter, req *http.Req
 			redirectUrl = utils.EnsureAbsoluteUrl(req, toa.Config.PostLogoutRedirectUri)
 		}
 	} else if state.Action == "RedirectThenLogin" {
-		toa.redirectToProvider(rw, req, redirectUrl, state.IsChallenge)
+		toa.redirectToProviderAsking(rw, req, redirectUrl, state.IsChallenge, false, state.Scopes)
 		return
 	}
 
@@ -718,11 +719,35 @@ func (toa *TraefikOidcAuth) handleLogin(rw http.ResponseWriter, req *http.Reques
 		}
 	}
 
+	scopes := toa.loginScopes(req)
+
 	if toa.needsDoubleRedirect(req) {
-		toa.doubleRedirectToProvider(rw, req, redirectUrl, isChallenge)
+		toa.doubleRedirectToProviderAsking(rw, req, redirectUrl, isChallenge, scopes)
 	} else {
-		toa.redirectToProvider(rw, req, redirectUrl, isChallenge)
+		toa.redirectToProviderAsking(rw, req, redirectUrl, isChallenge, false, scopes)
 	}
+}
+
+// loginScopes returns the scopes a request to the LoginUri names for its login (AllowLoginScopes), space-separated
+// and with openid always among them, or "" where the login asks for the configured Scopes: the setting is off, the
+// request is no login request (a page's own `scope` parameter is not ours), or it names none.
+func (toa *TraefikOidcAuth) loginScopes(req *http.Request) string {
+	if !toa.Config.AllowLoginScopes || toa.Config.LoginUri == "" || !strings.HasPrefix(req.RequestURI, toa.Config.LoginUri) {
+		return ""
+	}
+
+	scopes := strings.Fields(req.URL.Query().Get("scope"))
+	if len(scopes) == 0 {
+		return ""
+	}
+
+	for _, scope := range scopes {
+		if scope == "openid" {
+			return strings.Join(scopes, " ")
+		}
+	}
+
+	return "openid " + strings.Join(scopes, " ")
 }
 
 // needsDoubleRedirect reports whether the login has to go through the callback URL first, because that's
@@ -753,6 +778,12 @@ func (toa *TraefikOidcAuth) redirectToProvider(rw http.ResponseWriter, req *http
 // redirectToProviderWithRetry is redirectToProvider, but also records in the state whether this login
 // was restarted from the callback (see OidcState.Retried).
 func (toa *TraefikOidcAuth) redirectToProviderWithRetry(rw http.ResponseWriter, req *http.Request, redirectUrl string, isChallenge bool, retried bool) {
+	toa.redirectToProviderAsking(rw, req, redirectUrl, isChallenge, retried, "")
+}
+
+// redirectToProviderAsking is redirectToProviderWithRetry for a login that names its scopes (see
+// OidcState.Scopes); with "" it asks for the configured Scopes.
+func (toa *TraefikOidcAuth) redirectToProviderAsking(rw http.ResponseWriter, req *http.Request, redirectUrl string, isChallenge bool, retried bool, scopes string) {
 	toa.logger.Log(logging.LevelInfo, "Redirecting to OIDC provider...")
 
 	callbackUrl := toa.GetAbsoluteCallbackURL(req).String()
@@ -762,6 +793,11 @@ func (toa *TraefikOidcAuth) redirectToProviderWithRetry(rw http.ResponseWriter, 
 		RedirectUrl: redirectUrl,
 		IsChallenge: isChallenge,
 		Retried:     retried,
+		Scopes:      scopes,
+	}
+
+	if scopes == "" {
+		scopes = strings.Join(toa.Config.Scopes, " ")
 	}
 
 	toa.logger.Log(logging.LevelDebug, "AuthorizationEndPoint: %s", toa.DiscoveryDocument.AuthorizationEndpoint)
@@ -775,7 +811,7 @@ func (toa *TraefikOidcAuth) redirectToProviderWithRetry(rw http.ResponseWriter, 
 
 	urlValues := url.Values{
 		"response_type": {"code"},
-		"scope":         {strings.Join(toa.Config.Scopes, " ")},
+		"scope":         {scopes},
 		"client_id":     {toa.Config.Provider.ClientId},
 		"redirect_uri":  {callbackUrl},
 		"resource":      toa.Config.RequestedResources,
@@ -841,6 +877,11 @@ func (toa *TraefikOidcAuth) redirectToProviderWithRetry(rw http.ResponseWriter, 
 }
 
 func (toa *TraefikOidcAuth) doubleRedirectToProvider(rw http.ResponseWriter, req *http.Request, redirectUrl string, isChallenge bool) {
+	toa.doubleRedirectToProviderAsking(rw, req, redirectUrl, isChallenge, "")
+}
+
+// doubleRedirectToProviderAsking is doubleRedirectToProvider for a login that names its scopes.
+func (toa *TraefikOidcAuth) doubleRedirectToProviderAsking(rw http.ResponseWriter, req *http.Request, redirectUrl string, isChallenge bool, scopes string) {
 	toa.logger.Log(logging.LevelInfo, "Redirecting to OIDC provider via callback URL...")
 
 	callbackUrl := toa.GetAbsoluteCallbackURL(req)
@@ -849,6 +890,7 @@ func (toa *TraefikOidcAuth) doubleRedirectToProvider(rw http.ResponseWriter, req
 		Action:      "RedirectThenLogin",
 		RedirectUrl: redirectUrl,
 		IsChallenge: isChallenge,
+		Scopes:      scopes,
 	}
 
 	stateBase64, err := oidc.EncodeState(&state, toa.Config.Secret)

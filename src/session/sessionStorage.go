@@ -28,6 +28,11 @@ type SessionState struct {
 	// Used to avoid redirecting to the IDP again for the same session, which would otherwise risk an
 	// infinite redirect loop.
 	ChallengeAttempted bool `json:"challenge_attempted"`
+
+	// The scopes the login of this session asked for, space-separated, where the login request named them
+	// (AllowLoginScopes); empty for the configured Scopes. A token renewal asks for the same list: asking
+	// for the configured one would narrow the renewed token to it.
+	Scopes string `json:"scopes,omitempty"`
 }
 
 func GenerateSessionId() string {

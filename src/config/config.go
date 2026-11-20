@@ -30,7 +30,12 @@ type Config struct {
 	// The URL used to start authorization when needed.
 	// All other requests that are not already authorized will return a 401 Unauthorized.
 	// When left empty, all requests can start authorization.
-	LoginUri                    string   `json:"login_uri"`
+	LoginUri string `json:"login_uri"`
+	// With AllowLoginScopes a request to the LoginUri may name the scopes of its login in the query parameter
+	// `scope` (space-separated; `openid` is always asked for). The provider then decides, as for every login,
+	// which of them this client and this user are given. The session keeps the list, and a token renewal asks
+	// for it again. Off (the default), every login asks for Scopes.
+	AllowLoginScopes            bool     `json:"allow_login_scopes"`
 	PostLoginRedirectUri        string   `json:"post_login_redirect_uri"`
 	ValidPostLoginRedirectUris  []string `json:"valid_post_login_redirect_uris"`
 	LogoutUri                   string   `json:"logout_uri"`
