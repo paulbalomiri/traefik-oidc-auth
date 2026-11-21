@@ -129,6 +129,33 @@ func TestLogin_ThroughTheCallbackKeepsItsScopes(t *testing.T) {
 	}
 }
 
+// The callback's address is configuration: a login that goes through it adds its state to a copy, and the
+// provider is given the address as it was configured, for this login and for every later one.
+func TestLogin_ThroughTheCallbackLeavesTheCallbackAddressAsConfigured(t *testing.T) {
+	toa := newLoginScopesTestAuth(t)
+	callback, err := url.Parse("https://auth.example.com/oidc/callback")
+	if err != nil {
+		t.Fatal(err)
+	}
+	toa.CallbackURL = callback
+	first := httptest.NewRecorder()
+
+	toa.handleLogin(first, requestTo("/login?scope=openid+admin.cluster"), false, "")
+
+	if got := toa.CallbackURL.String(); got != "https://auth.example.com/oidc/callback" {
+		t.Fatalf("after a login went through the callback, the configured callback is %q", got)
+	}
+	state := decodeStateFromLocation(t, toa.Config.Secret, first.Header().Get("Location"))
+	second := callbackWithState(t, toa, state, "", "")
+	location, err := url.Parse(second.Header().Get("Location"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := location.Query().Get("redirect_uri"); got != "https://auth.example.com/oidc/callback" {
+		t.Fatalf("the provider is given the redirect_uri %q, expected the configured callback", got)
+	}
+}
+
 func TestCallback_ARestartedLoginKeepsItsScopes(t *testing.T) {
 	toa := newLoginScopesTestAuth(t)
 	state := &oidc.OidcState{Action: "Login", RedirectUrl: "https://app.example.com/page", Scopes: "openid admin.cluster"}

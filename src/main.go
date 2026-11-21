@@ -81,14 +81,15 @@ func (toa *TraefikOidcAuth) EnsureOidcDiscovery() error {
 	return nil
 }
 
+// GetAbsoluteCallbackURL returns the callback's address for this request, always as a copy of its own: a caller
+// may add a query to it (the login that goes through the callback does), and the configured address is shared by
+// every request.
 func (toa *TraefikOidcAuth) GetAbsoluteCallbackURL(req *http.Request) *url.URL {
-	if utils.UrlIsAbsolute(toa.CallbackURL) {
-		return toa.CallbackURL
-	} else {
-		abs := *toa.CallbackURL
+	abs := *toa.CallbackURL
+	if !utils.UrlIsAbsolute(toa.CallbackURL) {
 		utils.FillHostSchemeFromRequest(req, &abs)
-		return &abs
 	}
+	return &abs
 }
 
 func (toa *TraefikOidcAuth) isCallbackRequest(req *http.Request) bool {
