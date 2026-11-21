@@ -249,11 +249,17 @@ func (toa *TraefikOidcAuth) introspectToken(token string) (bool, map[string]inte
 	}
 }
 
-func (toa *TraefikOidcAuth) renewToken(refreshToken string) (*oidc.OidcTokenResponse, error) {
+// renewToken asks for new tokens with the scopes the session's login named (SessionState.Scopes), or with the
+// configured Scopes where it named none ("").
+func (toa *TraefikOidcAuth) renewToken(refreshToken string, scopes string) (*oidc.OidcTokenResponse, error) {
+	if scopes == "" {
+		scopes = strings.Join(toa.Config.Scopes, " ")
+	}
+
 	urlValues := url.Values{
 		"grant_type":    {"refresh_token"},
 		"client_id":     {toa.Config.Provider.ClientId},
-		"scope":         {strings.Join(toa.Config.Scopes, " ")},
+		"scope":         {scopes},
 		"refresh_token": {refreshToken},
 		"resources":     toa.Config.RequestedResources,
 	}

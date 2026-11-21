@@ -28,6 +28,11 @@ type OidcState struct {
 	// regardless of which middleware instance's rules end up handling the callback.
 	IsChallenge bool `json:"is_challenge"`
 
+	// The scopes this login asks for, space-separated, where the login request named them
+	// (AllowLoginScopes); empty for the configured Scopes. Carried through the callback so that the
+	// session can keep the list, and so that a login restarted from the callback asks for it again.
+	Scopes string `json:"sc,omitempty"`
+
 	// Set when this login was restarted from the callback, either because the identity provider
 	// reported that the previous login flow had expired, or because the state wasn't bound to the
 	// browser completing it. A login is restarted only once, so the callback cannot turn into a
